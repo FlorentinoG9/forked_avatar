@@ -333,10 +333,7 @@ class VersionManager:
                 release_notes += "\n"
         
         release_notes += "---\n\n"
-        release_notes += f"**Full Changelog**: [CHANGELOG.md](https://github.com/3C-SCSU/Avatar/blob/main/CHANGELOG.md)\n"
-        release_notes += f"**Installation**: See [SETUP_GUIDE.md](https://github.com/3C-SCSU/Avatar/blob/main/SETUP_GUIDE.md)\n"
-        release_notes += "---\n\n"
-        
+
         if base_url:
             release_notes += f"**Full Changelog**: [CHANGELOG.md]({base_url}/CHANGELOG.md)\n"
             release_notes += f"**Installation**: See [SETUP_GUIDE.md]({base_url}/SETUP_GUIDE.md)\n"
