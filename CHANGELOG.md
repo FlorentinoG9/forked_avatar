@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+<<<<<<< HEAD
 
 
 ## [1.0.6] - 2025-10-24
@@ -27,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Release token from github token to release token pat(ci/cd) (79ce9e8)
 
+=======
+>>>>>>> 18ae2a0 (chore: release v1.0.4 [skip ci])
 ## [1.0.4] - 2025-10-24
 
 ### Changed
