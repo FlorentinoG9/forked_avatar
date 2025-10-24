@@ -122,7 +122,8 @@ class ConventionalCommit:
 
         # Check for breaking changes in body
         self.body = '\n'.join(lines[1:]).strip()
-        if 'BREAKING CHANGE' in self.body.upper():
+         # Match "BREAKING CHANGE:" / "BREAKING-CHANGE:" (case-insensitive), line-anchored
+        if re.search(r'(?im)^(?:BREAKING(?:\s|-)?CHANGES?):', self.body):
             self.breaking_change = True
 
     def get_version_bump(self) -> str:
@@ -296,6 +297,22 @@ class VersionManager:
         }
         
         release_notes = f"# Release v{version}\n\n"
+
+        # Derive repo/branch for links
+        repo_slug = os.environ.get("GITHUB_REPOSITORY", "")
+        ref_name = os.environ.get("GITHUB_REF_NAME", "main")
+        base_url = ""
+        if repo_slug:
+            base_url = f"https://github.com/{repo_slug}/blob/{ref_name}"
+        else:
+            # Fallback: parse origin remote
+            try:
+                origin_url = next((r.url for r in self.repo.remotes if r.name == "origin"), "")
+                m = re.search(r"github\.com[:/](.*?)(?:\.git)?$", origin_url)
+                if m:
+                    base_url = f"https://github.com/{m.group(1)}/blob/{ref_name}"
+            except Exception:
+                pass
         
         # Order categories by importance
         category_order = ['FIXES', 'NEW FEATURES', 'CHANGES', 'SECURITY', 'DEPRECATED', 'REMOVED']
@@ -318,7 +335,15 @@ class VersionManager:
         release_notes += "---\n\n"
         release_notes += f"**Full Changelog**: [CHANGELOG.md](https://github.com/3C-SCSU/Avatar/blob/main/CHANGELOG.md)\n"
         release_notes += f"**Installation**: See [SETUP_GUIDE.md](https://github.com/3C-SCSU/Avatar/blob/main/SETUP_GUIDE.md)\n"
+        release_notes += "---\n\n"
         
+        if base_url:
+            release_notes += f"**Full Changelog**: [CHANGELOG.md]({base_url}/CHANGELOG.md)\n"
+            release_notes += f"**Installation**: See [SETUP_GUIDE.md]({base_url}/SETUP_GUIDE.md)\n"
+        else:
+            release_notes += "**Full Changelog**: CHANGELOG.md\n"
+            release_notes += "**Installation**: See SETUP_GUIDE.md\n"
+
         # Write to release notes file
         release_notes_file = self.repo_path / "RELEASE_NOTES.md"
         release_notes_file.write_text(release_notes)
