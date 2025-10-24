@@ -34,32 +34,61 @@ class ConventionalCommit:
     # Commit type mappings to version bumps
     TYPE_MAPPING = {
         'feat': 'minor',        # New features
+        'feature': 'minor',     # New features (alternative)
         'fix': 'patch',         # Bug fixes
+        'bugfix': 'patch',      # Bug fixes (alternative)
+        'hotfix': 'patch',      # Critical bug fixes
         'perf': 'patch',        # Performance improvements
+        'performance': 'patch', # Performance improvements (alternative)
         'docs': 'patch',        # Documentation changes
+        'documentation': 'patch', # Documentation changes (alternative)
         'style': 'patch',       # Code style changes
         'refactor': 'patch',    # Code refactoring
+        'refactoring': 'patch', # Code refactoring (alternative)
         'test': 'patch',        # Test additions/changes
+        'tests': 'patch',       # Test additions/changes (alternative)
         'chore': 'patch',       # Maintenance tasks
         'ci': 'patch',          # CI/CD changes
+        'cd': 'patch',          # CI/CD changes (alternative)
         'build': 'patch',       # Build system changes
+        'deps': 'patch',        # Dependency updates
+        'dependencies': 'patch', # Dependency updates (alternative)
+        'security': 'patch',    # Security fixes
+        'sec': 'patch',         # Security fixes (alternative)
+        'deprecated': 'minor',  # Deprecation notices
+        'deprecate': 'minor',   # Deprecation notices (alternative)
+        'removed': 'major',     # Removed features
+        'remove': 'major',      # Removed features (alternative)
     }
     
     # Changelog section mappings
     CHANGELOG_MAPPING = {
         'feat': 'Added',
-        'fix': 'Fixed', 
+        'feature': 'Added',
+        'fix': 'Fixed',
+        'bugfix': 'Fixed', 
+        'hotfix': 'Fixed',
         'perf': 'Changed',
+        'performance': 'Changed',
         'docs': 'Changed',
+        'documentation': 'Changed',
         'style': 'Changed',
         'refactor': 'Changed',
+        'refactoring': 'Changed',
         'test': 'Changed',
+        'tests': 'Changed',
         'chore': 'Changed',
         'ci': 'Changed',
+        'cd': 'Changed',
         'build': 'Changed',
+        'deps': 'Changed',
+        'dependencies': 'Changed',
         'security': 'Security',
+        'sec': 'Security',
         'deprecated': 'Deprecated',
+        'deprecate': 'Deprecated',
         'removed': 'Removed',
+        'remove': 'Removed',
     }
 
     def __init__(self, commit_message: str, commit_hash: str = ""):
@@ -256,15 +285,34 @@ class VersionManager:
         if not entries:
             return
         
+        # Map changelog sections to release note categories
+        release_categories = {
+            'Fixed': 'FIXES',
+            'Added': 'NEW FEATURES', 
+            'Changed': 'CHANGES',
+            'Deprecated': 'DEPRECATED',
+            'Removed': 'REMOVED',
+            'Security': 'SECURITY'
+        }
+        
         release_notes = f"# Release v{version}\n\n"
         
-        for section, items in entries.items():
-            if items:
-                release_notes += f"## {section}\n\n"
-                for item in items:
-                    # Remove the leading "- " since GitHub will format it
+        # Order categories by importance
+        category_order = ['FIXES', 'NEW FEATURES', 'CHANGES', 'SECURITY', 'DEPRECATED', 'REMOVED']
+        
+        for category in category_order:
+            # Find matching entries for this category
+            category_items = []
+            for section, items in entries.items():
+                if release_categories.get(section) == category and items:
+                    category_items.extend(items)
+            
+            if category_items:
+                release_notes += f"## {category}:\n"
+                for item in category_items:
+                    # Remove the leading "- " and format consistently
                     clean_item = item[2:] if item.startswith("- ") else item
-                    release_notes += f"- {clean_item}\n"
+                    release_notes += f" - {clean_item}\n"
                 release_notes += "\n"
         
         release_notes += "---\n\n"
